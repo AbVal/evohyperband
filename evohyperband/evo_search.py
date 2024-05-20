@@ -182,7 +182,7 @@ class EHBSearchCV(HyperbandSearchCV):
                         results_list.extend(qual)
 
                         num_features, cat_features = types_from_distribution(self.param_distributions)
-                        new_features_dict = dict_from_param_list(top_configurations[-int(len(top_configurations) * (1 - self.chi)):])
+                        new_features_dict = dict_from_param_list(top_configurations)
 
                         for key, value in new_features_dict.items():
                             if key not in features_dict:
@@ -191,10 +191,10 @@ class EHBSearchCV(HyperbandSearchCV):
 
                         results_array = np.array(results_list)
                         quantile = np.quantile(results_array, self.chi)
-                        bool_results = (results_array > quantile)
+                        bool_results = np.array(results_array >= quantile)
 
                         for key, value in features_dict.items():
-                            filtered_value = [x for i, x in enumerate(value) if bool_results[i]]
+                            filtered_value = [x for b, x in zip(bool_results, value) if b]
                             if key in num_features:
                                 kernel_dict[key] = sp.gaussian_kde(filtered_value)
                             else:
